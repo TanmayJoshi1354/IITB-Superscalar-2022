@@ -5,6 +5,7 @@ library work;
 
 entity rat is
 	port(
+		reset: in std_logic;
 		I1_src1:in std_logic_vector(2 downto 0);
 		I1_src2:in std_logic_vector(2 downto 0);
 		I1_dest: in std_logic(2 downto 0);
@@ -28,13 +29,20 @@ architecture rat_arch of rat is
 	signal table: entry_type;
 	
 begin
-process(I1_wr_dest, I2_wr_dest)
+process(reset,I1_wr_dest, I2_wr_dest)
 begin
+	if(reset='1') then
+		init: for k in 0 to 7 loop
+			stack(k)<=std_logic_vector(to_unsigned(k,6));
+		end loop init;
+	end if;
+	
 	I1_opr1<=table(to_integer(unsigned(I1_src1)));
 	I1_opr2<=table(to_integer(unsigned(I1_src2)));
 	if(I1_wr_dest='1') then
 		table(to_integer(unsigned(I1_dest)))<=I1_dest_rr;
 	end if;
+	
 	I2_opr1<=table(to_integer(unsigned(I2_src1)));
 	I2_opr2<=table(to_integer(unsigned(I2_src2)));
 	if(I2_wr_dest='1') then
