@@ -8,12 +8,12 @@ entity rat is
 		I1_src1:in std_logic_vector(2 downto 0);
 		I1_src2:in std_logic_vector(2 downto 0);
 		I1_dest: in std_logic(2 downto 0);
-		I1_dest_rr: in std_logic_vector(6 downto 0);
+		I1_dest_rr: in std_logic_vector(5 downto 0);
 		I1_wr_dest: in std_logic;
 		I2_src1:in std_logic_vector(2 downto 0);
 		I2_src2:in std_logic_vector(2 downto 0);
 		I2_dest: in std_logic(2 downto 0);
-		I2_dest_rr: in std_logic_vector(6 downto 0);
+		I2_dest_rr: in std_logic_vector(5 downto 0);
 		I2_wr_dest: in std_logic;
 		
 		I1_opr1:in std_logic_vector(15 downto 0);
@@ -24,7 +24,7 @@ entity rat is
 end rat;
 
 architecture rat_arch of rat is
-	type entry_type is array(7 downto 0) of std_logic_vector(15 downto 0);
+	type entry_type is array(7 downto 0) of std_logic_vector(5 downto 0);
 	signal table: entry_type;
 	
 begin
