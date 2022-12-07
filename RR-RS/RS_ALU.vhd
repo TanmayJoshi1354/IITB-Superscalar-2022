@@ -2,7 +2,7 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-entity rs_alu is
+entity rs is
 	port(
 		clk: in std_logic;
 		rst: in std_logic;
@@ -13,14 +13,19 @@ entity rs_alu is
 		I1_opr2_in:in std_logic_vector(15 downto 0);
 		I1_v1_in: in std_logic_vector(0 downto 0);
 		I1_v2_in: in std_logic_vector(0 downto 0);
-		I1_dest_reg_in: in std_logic_vector(2 downto 0);
+		I1_dest_reg_in: in std_logic_vector(5 downto 0);
 		I1_opcode_in: in std_logic_vector(3 downto 0);
 		I2_opr1_in:in std_logic_vector(15 downto 0);
 		I2_opr2_in:in std_logic_vector(15 downto 0);
 		I2_v1_in: in std_logic_vector(0 downto 0);
 		I2_v2_in: in std_logic_vector(0 downto 0);
-		I2_dest_reg_in: in std_logic_vector(2 downto 0);
+		I2_dest_reg_in: in std_logic_vector(5 downto 0);
 		I2_opcode_in: in std_logic_vector(3 downto 0);
+		
+		inst_cz: in integer;
+		cin: in std_logic;
+		zin: in std_logic;
+		cz_dep: in std_logic_vector(1 downto 0);
 		k1: in integer;
 		k2: in integer;
 		
@@ -38,7 +43,7 @@ entity rs_alu is
 	);
 end rs_alu;
 
-architecture rs1 of rs_alu is
+architecture rs1 of rs is
 type rs_index is array(99 downto 0) of std_logic_vector(44 downto 0);
 ---Mapping of each entry: Opcode, OPR1, V1, OPR2, V2, Renamed Register index, V
 type inst_index is array(0 to 99) of integer;
@@ -47,9 +52,13 @@ signal inst: inst_index:=(others=>0);
 shared variable i: integer:=0;
 signal busy: std_logic_vector(99 downto 0):=(others=>'0');
 signal entry: std_logic_vector(44 downto 0);
+signal c: std_logic_vector(99 downto 0):=(others=>'0');
+signal z: std_logic_vector(99 downto 0):=(others=>'0');
+signal czv: std_logic_vector(99 downto 0):=(others=>'0');
+signal temp: integer;
 
 begin
-process(clk, rst, wr1, wr2, clr, busy)
+process(clk, rst, wr1, wr2, clr, busy, cz_dep)
 begin
 	if rising_edge(clk) then
 		if(rst='1') then
@@ -84,7 +93,10 @@ begin
 	end if;
 	valid: for k in 0 to 99 loop
 		entry<=res_stn(k);
-		entry(0 downto 0)<=entry(7 downto 7) and entry(24 downto 24);
+		if(cz_dep="01" or cz_dep="10") then
+			entry(0)<=entry(7) and entry(24) and c(k) and z(k);
+		else
+			entry(0)<=entry(7) and entry(24);
 		v(k)<=entry(0);
 		res_stn(k)<=entry;
 	end loop valid;
@@ -96,18 +108,31 @@ begin
 		if(k1<100 and k1>=0) then
 			I1_opr1_out<=res_stn(k1)(40 downto 25);
 			I1_opr2_out<=res_stn(k1)(23 downto 8);
-			I1_dest_reg_out<=res_stn(k1)(6 downto 0);
+			--I1_dest_reg_out<=res_stn(k1)(5 downto 0);
 			I1_opcode_out<=res_stn(k1)(44 downto 41);
 			inst_num1<=inst(k1);
 			busy(k1)<='0';
 		end if;
 		if(k2<100 and k2>=0) then
-			I1_opr1_out<=res_stn(k2)(40 downto 25);
-			I1_opr2_out<=res_stn(k2)(23 downto 8);
-			I1_dest_reg_out<=res_stn(k2)(6 downto 0);
-			I1_opcode_out<=res_stn(k2)(44 downto 41);
-			inst_num1<=inst(k2);
+			I2_opr1_out<=res_stn(k2)(40 downto 25);
+			I2_opr2_out<=res_stn(k2)(23 downto 8);
+			--I1_dest_reg_out<=res_stn(k2)(5 downto 0);
+			I2_opcode_out<=res_stn(k2)(44 downto 41);
+			inst_num2<=inst(k2);
 			busy(k2)<='0';
+		end if;
+end process;
+
+process(inst_cz)
+begin
+	check: for k in 0 to 99 loop
+		if(inst(k)>inst_cz) then
+			c(k)<=cin;
+			z(k)<=zin;
+		end if;
+		temp:=inst_cz+1;
+		if(inst(k)=temp) then
+			czv(k)<='1';
 		end if;
 end process;
 

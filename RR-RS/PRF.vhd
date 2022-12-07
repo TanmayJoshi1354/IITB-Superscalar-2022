@@ -14,6 +14,7 @@ entity prf is
 		D_in: in std_logic_vector(15 downto 0);
 		Addr_in: in std_logic_vector(5 downto 0);
 		wr: in std_logic;
+		
 		I1_wr_dest: in std_logic;
 		I1_dest_rr: in std_logic_vector(5 downto 0);
 		I2_wr_dest: in std_logic;
