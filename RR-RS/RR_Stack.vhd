@@ -8,10 +8,10 @@ entity rr_stack is
 		reset: in std_logic;
 		I1_dest: in std_logic_vector(2 downto 0);
 		I1_wr_dest: in std_logic;
-		I2_dest: in std_logic(2 downto 0);
+		I2_dest: in std_logic_vector(2 downto 0);
 		I2_wr_dest: in std_logic;
 		wr_stack: in std_logic;
-		completed_rr: in std_logic(5 downto 0);
+		completed_rr: in std_logic_vector(5 downto 0);
 		
 		I1_dest_rr: out std_logic_vector(5 downto 0);
 		I2_dest_rr: out std_logic_vector(5 downto 0)
@@ -38,24 +38,24 @@ begin
 		update2: for k in 0 to 61 loop
 			stack(k)<=stack(k+2);
 		end loop update2;
-		ptr:=ptr-2;
+		ptr<=ptr-2;
 	elsif(I1_wr_dest='1') then
 		I1_dest_rr<=stack(0);
 		update1: for k in 0 to 62 loop
 			stack(k)<=stack(k+1);
 		end loop update1;
-		ptr:=ptr-1;
+		ptr<=ptr-1;
 	elsif(I2_wr_dest='1') then
 		I2_dest_rr<=stack(0);
 		update3: for k in 0 to 62 loop
 			stack(k)<=stack(k+1);
 		end loop update3;
-		ptr:=ptr-1;
+		ptr<=ptr-1;
 	end if;
 	
 	if(wr_stack='1') then
 		stack(ptr+1)<=completed_rr;
-		ptr:=ptr+1;
+		ptr<=ptr+1;
 	end if;
 end process;
 end stack_arch;
