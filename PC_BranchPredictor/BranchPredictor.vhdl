@@ -7,6 +7,7 @@ entity BranchPredictor is
   	clk		: in std_logic;	-- clock
   	rst		: in std_logic;	-- reset				
 	instr	: in std_logic_vector(15 downto 0); 		-- instr for predicting
+	Address	: in std_logic_vector(15 downto 0); 		-- Program Counter
 	PC		: in std_logic_vector(15 downto 0); 		-- Program Counter
 	Pred_Res	: out std_logic;		-- Branch to be taken or not to be taken
 	Actual_Res	: in std_logic; -- Actual Outcome of branch
@@ -26,19 +27,25 @@ signal write_BHT_en : std_logic;
 signal write_loc : integer range 0 to 15;
 begin
 
-	Predictor : process(clk, rst, instr, PC)
+	Predictor : process(clk, rst, instr, PC, Address, Update_Bit)
 	variable check_bit: std_logic := '0';
 	variable LRU_count : LRU_counter;
 	variable least_rec,free_loc : integer range 0 to 31;
+	variable addr_temp: std_logic_vector(15 downto 0);
 	begin
 	if clk'event and clk = '0' then
 		if rst = '1' then
 			Pred_Res <= '0';
 			occupied <= (others => '0');
 			LRU_count  := (others => 0);
-		elsif instr(15 downto 14) = "10" then
+		elsif instr(15 downto 12) = "1000" then
+			if Update_Bit= '0' then
+				addr_temp := PC;
+			else 
+				addr_temp := Address;
+			end if;
 			L1: for i in 0 to 31 loop
-				if ( BHT(i)(15 downto 0) = PC ) and ( occupied(i) = '1' ) then
+				if ( BHT(i)(15 downto 0) = addr_temp ) and ( occupied(i) = '1' ) then
 					Pred_Res <=  BHT(i)(17);
 					LRU_count(i) := 0;
 					write_BHT_en <= '0';
@@ -58,8 +65,8 @@ begin
 					end loop L2;
 					occupied(free_loc) <= '1';
 					LRU_count (free_loc) := 0;
-					write_table <= "01" & PC;
-					Pred_Res <=  '1';
+					write_table <= "01" & addr_temp;
+					Pred_Res <=  '1'; -- Default result is taken
 					write_loc <= free_loc;
 					
 				else
@@ -75,7 +82,7 @@ begin
 					
 					occupied(least_rec) <= '1';
 					LRU_count (least_rec) := 1;
-					write_table <= "01" & PC;
+					write_table <= "01" & addr_temp;
 					Pred_Res <=  '1';
 					write_loc <= least_rec;
 										
@@ -89,7 +96,7 @@ begin
 	end if;
 	end process Predictor;
 	
-	Updater : process(clk, rst, PC, Actual_Res, Update_Bit)
+	Updater : process(clk, rst, Address, Actual_Res, Update_Bit)
 	variable update_loc : integer range 0 to 31;
 	begin
 		if clk'event and clk = '1' then
@@ -101,7 +108,7 @@ begin
 				end if;				
 				update_loc := 0;
 				L4: for i in 1 to 31 loop
-					if ( PC = BHT(i)(15 downto 0) ) and ( occupied(i) = '1' ) then
+					if ( Address = BHT(i)(15 downto 0) ) and ( occupied(i) = '1' ) then
 						update_loc := i;
 						exit L4;
 					end if;
