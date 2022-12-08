@@ -16,6 +16,7 @@ entity rs is
 		I1_dest_reg_in: in std_logic_vector(5 downto 0);
 		I1_opcode_in: in std_logic_vector(3 downto 0);
 		I1_dec_in: in std_logic_vector(2 downto 0);
+		I1_PC_in: in std_logic_vector(15 downto 0);
 		I2_opr1_in:in std_logic_vector(15 downto 0);
 		I2_opr2_in:in std_logic_vector(15 downto 0);
 		I2_v1_in: in std_logic_vector(0 downto 0);
@@ -23,6 +24,7 @@ entity rs is
 		I2_dest_reg_in: in std_logic_vector(5 downto 0);
 		I2_opcode_in: in std_logic_vector(3 downto 0);
 		I2_dec_in: in std_logic_vector(2 downto 0);
+		I2_PC_in: in std_logic_vector(15 downto 0);
 		
 		inst_cz: in integer;
 		cin: in std_logic;
@@ -80,10 +82,11 @@ entity rs is
 end rs;
 
 architecture rs1 of rs is
-type rs_index is array(99 downto 0) of std_logic_vector(44 downto 0);
+type rs_index is array(0 to 99) of std_logic_vector(44 downto 0);
 ---Mapping of each entry: Opcode, OPR1, V1, OPR2, V2, Renamed Register index, V
 type inst_index is array(0 to 99) of integer;
 type dec_index is array(0 to 99) of std_logic_vector(2 downto 0);
+type pc_index is array(0 to 99) of std_logic_vector(15 downto 0);
 signal res_stn: rs_index;
 signal inst: inst_index:=(others=>0);
 signal v: std_logic_vector(99 downto 0);
@@ -97,6 +100,7 @@ signal dec: dec_index:=(others=>"000");
 signal temp: integer;
 signal lmsm_tempcheck: std_logic_vector(43 downto 0):=(others=>'Z');
 signal opcode: std_logic_vector(3 downto 0);
+signal PC: pc_index;
 
 begin
 process(clk, rst, wr1, wr2, clr, busy, cz_dep, c, z, entry, res_stn, inst, v, dec, wb_wr1, wb_din1, wb-Addrin1, wb_wr2, wb_din2, wb_Addrin2)
@@ -118,6 +122,7 @@ begin
 							inst(k)<=i;
 							res_stn(k)<=(I1_opcode_in & I1_opr1_in & I1_v1_in & I1_opr2_in & I1_v2_in & I1_dest_reg_in & I1_v1_in and I1_v2_in);
 							dec(k)<=I1_dec_in;
+							PC(k)<=I1_PC_in;
 							i:=i+1;
 							busy(k)<='1';							
 							exit;
@@ -130,6 +135,7 @@ begin
 							inst(k)<=i;
 							res_stn(k)<=(I2_opcode_in & I2_opr1_in & I2_v1_in & I2_opr2_in & I2_v2_in & I2_dest_reg_in & I2_v1_in and I2_v2_in);
 							dec(k)<=I2_dec_in;
+							PC(k)<=I2_PC_in;
 							i:=i+1;
 							busy(k)<='1';							
 							exit;
