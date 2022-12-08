@@ -17,10 +17,30 @@ entity rat is
 		I2_dest_rr: in std_logic_vector(5 downto 0);
 		I2_wr_dest: in std_logic;
 		
+		lmsm: in std_logic;
+		I_opcode: in std_logic_vector(3 downto 0);
+		I_opr1_in: in std_logic_vector(5 downto 0);
+		I_opr2_in: in std_logic_vector(5 downto 0);
+		I_opr3_in: in std_logic_vector(5 downto 0);
+		I_opr4_in: in std_logic_vector(5 downto 0);
+		I_opr5_in: in std_logic_vector(5 downto 0);
+		I_opr6_in: in std_logic_vector(5 downto 0);
+		I_opr7_in: in std_logic_vector(5 downto 0);
+		I_opr8_in: in std_logic_vector(5 downto 0);
+		
 		I1_opr1:out std_logic_vector(15 downto 0);
 		I1_opr2:out std_logic_vector(15 downto 0);
 		I2_opr1:out std_logic_vector(15 downto 0);
-		I2_opr2:out std_logic_vector(15 downto 0)
+		I2_opr2:out std_logic_vector(15 downto 0);
+		
+		I_opr1: out std_logic_vector(15 downto 0);
+		I_opr2: out std_logic_vector(15 downto 0);
+		I_opr3: out std_logic_vector(15 downto 0);
+		I_opr4: out std_logic_vector(15 downto 0);
+		I_opr5: out std_logic_vector(15 downto 0);
+		I_opr6: out std_logic_vector(15 downto 0);
+		I_opr7: out std_logic_vector(15 downto 0);
+		I_opr8: out std_logic_vector(15 downto 0)
 		);
 end rat;
 
@@ -36,17 +56,37 @@ begin
 			table(k)<=std_logic_vector(to_unsigned(k,6));
 		end loop init;
 	end if;
-	
-	I1_opr1<=table(to_integer(unsigned(I1_src1)));
-	I1_opr2<=table(to_integer(unsigned(I1_src2)));
-	if(I1_wr_dest='1') then
-		table(to_integer(unsigned(I1_dest)))<=I1_dest_rr;
-	end if;
-	
-	I2_opr1<=table(to_integer(unsigned(I2_src1)));
-	I2_opr2<=table(to_integer(unsigned(I2_src2)));
-	if(I2_wr_dest='1') then
-		table(to_integer(unsigned(I2_dest)))<=I2_dest_rr;
+	if(lmsm='0') then
+		I1_opr1<=table(to_integer(unsigned(I1_src1)));
+		I1_opr2<=table(to_integer(unsigned(I1_src2)));
+		if(I1_wr_dest='1') then
+			table(to_integer(unsigned(I1_dest)))<=I1_dest_rr;
+		end if;
+		
+		I2_opr1<=table(to_integer(unsigned(I2_src1)));
+		I2_opr2<=table(to_integer(unsigned(I2_src2)));
+		if(I2_wr_dest='1') then
+			table(to_integer(unsigned(I2_dest)))<=I2_dest_rr;
+		end if;
+	else
+		if(I_opcode="1100") then
+			table(0)<=I_opr1_in;
+			table(1)<=I_opr2_in;
+			table(2)<=I_opr3_in;
+			table(3)<=I_opr4_in;
+			table(4)<=I_opr5_in;
+			table(5)<=I_opr6_in;
+			table(6)<=I_opr7_in;
+			table(7)<=I_opr8_in;
+		end if;
+		I_opr1<=table(0);
+		I_opr2<=table(1);
+		I_opr3<=table(2);
+		I_opr4<=table(3);
+		I_opr5<=table(4);
+		I_opr6<=table(5);
+		I_opr7<=table(6);
+		I_opr8<=table(7);
 	end if;
 end process;
 end rat_arch;
