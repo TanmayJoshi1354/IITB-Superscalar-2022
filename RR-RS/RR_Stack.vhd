@@ -10,8 +10,10 @@ entity rr_stack is
 		I1_wr_dest: in std_logic;
 		I2_dest: in std_logic_vector(2 downto 0);
 		I2_wr_dest: in std_logic;
-		wr_stack: in std_logic;
-		completed_rr: in std_logic_vector(5 downto 0);
+		wr_stack1: in std_logic;
+		completed_rr1: in std_logic_vector(5 downto 0);
+		wr_stack2: in std_logic;
+		completed_rr2: in std_logic_vector(5 downto 0);
 		
 		lmsm: in std_logic;
 		I_opcode: in std_logic_vector(3 downto 0);
@@ -82,8 +84,12 @@ begin
 		ptr<=ptr-8;
 	end if;
 	
-	if(wr_stack='1') then
-		stack(ptr+1)<=completed_rr;
+	if(wr_stack1='1') then
+		stack(ptr+1)<=completed_rr1;
+		ptr<=ptr+1;
+	end if;
+	if(wr_stack2='1') then
+		stack(ptr+1)<=completed_rr2;
 		ptr<=ptr+1;
 	end if;
 end process;

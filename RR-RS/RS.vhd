@@ -34,17 +34,29 @@ entity rs is
 		Iout1,Iout2,Iout3,Iout4,Iout5,Iout6,Iout7,Iout0: in std_logic_vector(43 downto 0);
 		N: in integer;
 		
+		--Writeback
+		wb_din1: in std_logic_vector(15 downto 0);
+		wb_Addrin1: in std_logic_vector(5 downto 0);
+		wb_wr1: in std_logic;
+		wb_din2: in std_logic_vector(15 downto 0);
+		wb_Addrin2: in std_logic_vector(5 downto 0);
+		wb_wr2: in std_logic;
+		
 		I1_opr1_out:out std_logic_vector(15 downto 0);
 		I1_opr2_out:out std_logic_vector(15 downto 0);
 		I1_dest_reg_out: out std_logic_vector(2 downto 0);
 		I1_opcode_out: out std_logic_vector(3 downto 0);
 		I1_dec_out: out std_logic_vector(2 downto 0);
+		I1_c: out std_logic;
+		I1_z: out std_logic;
 		
 		I2_opr1_out:out std_logic_vector(15 downto 0);
 		I2_opr2_out:out std_logic_vector(15 downto 0);
 		I2_dest_reg_out: out std_logic_vector(2 downto 0);
 		I2_opcode_out: out std_logic_vector(3 downto 0);
 		I2_dec_out: out std_logic_vector(2 downto 0);
+		I2_c: out std_logic;
+		I2_z: out std_logic;
 		
 		I3_opr1_out:out std_logic_vector(15 downto 0);
 		I3_opr2_out:out std_logic_vector(15 downto 0);
@@ -87,7 +99,7 @@ signal lmsm_tempcheck: std_logic_vector(43 downto 0):=(others=>'Z');
 signal opcode: std_logic_vector(3 downto 0);
 
 begin
-process(clk, rst, wr1, wr2, clr, busy, cz_dep, c, z, entry, res_stn, inst, v, dec)
+process(clk, rst, wr1, wr2, clr, busy, cz_dep, c, z, entry, res_stn, inst, v, dec, wb_wr1, wb_din1, wb-Addrin1, wb_wr2, wb_din2, wb_Addrin2)
 variable k1,k2,k3,k4: integer;
 begin
 	if rising_edge(clk) then
@@ -249,6 +261,8 @@ begin
 		I1_opcode_out<=res_stn(k1)(44 downto 41);
 		I1_dec_out<=dec(k1);
 		inst_num1<=inst(k1);
+		I1_c<=c(k1);
+		I1_z<=z(k1);
 		busy(k1)<='0';
 	end if;
 	
@@ -257,6 +271,8 @@ begin
 		I2_opr2_out<=res_stn(k2)(23 downto 8);
 		I2_opcode_out<=res_stn(k2)(44 downto 41);
 		I2_dec_out<=dec(k2);
+		I2_c<=c(k1);
+		I2_z<=z(k1);
 		inst_num2<=inst(k2);
 		busy(k2)<='0';
 	end if;
@@ -280,6 +296,26 @@ begin
 		inst_num4<=inst(k4);
 		busy(k4)<='0';
 	end if;
+	
+	if(wb_wr1='1') then
+		L1: for k in 0 to 99 loop
+			if(res_stn(k)(24 downto 24)='0' and res_stn(k)(40 downto 25)=wb_Addrin1) then
+				res_stn(k)(40 downto 25)<=wb_din1;
+				res_stn(k)(24 downto 24)<='1';
+			end if;
+			if(res_stn(k)(7 downto 7)='0' and res_stn(k)(23 downto 8)=wb_Addrin1) then
+				res_stn(k)(23 downto 8)<=wb_din1;
+				res_stn(k)(7 downto 7)<='1';
+			end if;
+			if(res_stn(k)(24 downto 24)='0' and res_stn(k)(40 downto 25)=wb_Addrin2) then
+				res_stn(k)(40 downto 25)<=wb_din2;
+				res_stn(k)(24 downto 24)<='1';
+			end if;
+			if(res_stn(k)(7 downto 7)='0' and res_stn(k)(23 downto 8)=wb_Addrin2) then
+				res_stn(k)(23 downto 8)<=wb_din2;
+				res_stn(k)(7 downto 7)<='1';
+			end if;
+		end loop L2;
 end if;
 end process;
 
