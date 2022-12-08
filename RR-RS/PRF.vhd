@@ -27,7 +27,7 @@ entity prf is
 		I2_opr1: out std_logic_vector(15 downto 0);
 		I2_opr1_v: out std_logic;
 		I2_opr2: out std_logic_vector(15 downto 0);
-		I2_opr2_v: out std_logic;
+		I2_opr2_v: out std_logic
 		);
 end prf;
 

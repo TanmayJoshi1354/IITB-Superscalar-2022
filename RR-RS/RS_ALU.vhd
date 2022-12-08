@@ -41,7 +41,7 @@ entity rs is
 		inst_num1: out integer;
 		inst_num2: out integer
 	);
-end rs_alu;
+end rs;
 
 architecture rs1 of rs is
 type rs_index is array(99 downto 0) of std_logic_vector(44 downto 0);
@@ -97,6 +97,7 @@ begin
 			entry(0)<=entry(7) and entry(24) and c(k) and z(k);
 		else
 			entry(0)<=entry(7) and entry(24);
+		end if;
 		v(k)<=entry(0);
 		res_stn(k)<=entry;
 	end loop valid;
@@ -130,10 +131,11 @@ begin
 			c(k)<=cin;
 			z(k)<=zin;
 		end if;
-		temp:=inst_cz+1;
+		temp<=inst_cz+1;
 		if(inst(k)=temp) then
 			czv(k)<='1';
 		end if;
+	end loop check;
 end process;
 
 end rs1;

@@ -6,7 +6,7 @@ library work;
 entity rr_stack is
 	port(
 		reset: in std_logic;
-		I1_dest: in std_logic(2 downto 0);
+		I1_dest: in std_logic_vector(2 downto 0);
 		I1_wr_dest: in std_logic;
 		I2_dest: in std_logic(2 downto 0);
 		I2_wr_dest: in std_logic;

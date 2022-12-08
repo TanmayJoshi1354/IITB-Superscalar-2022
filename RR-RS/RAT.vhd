@@ -8,19 +8,19 @@ entity rat is
 		reset: in std_logic;
 		I1_src1:in std_logic_vector(2 downto 0);
 		I1_src2:in std_logic_vector(2 downto 0);
-		I1_dest: in std_logic(2 downto 0);
+		I1_dest: in std_logic_vector(2 downto 0);
 		I1_dest_rr: in std_logic_vector(5 downto 0);
 		I1_wr_dest: in std_logic;
 		I2_src1:in std_logic_vector(2 downto 0);
 		I2_src2:in std_logic_vector(2 downto 0);
-		I2_dest: in std_logic(2 downto 0);
+		I2_dest: in std_logic_vector(2 downto 0);
 		I2_dest_rr: in std_logic_vector(5 downto 0);
 		I2_wr_dest: in std_logic;
 		
-		I1_opr1:in std_logic_vector(15 downto 0);
-		I1_opr2:in std_logic_vector(15 downto 0);
-		I2_opr1:in std_logic_vector(15 downto 0);
-		I2_opr2:in std_logic_vector(15 downto 0)
+		I1_opr1:out std_logic_vector(15 downto 0);
+		I1_opr2:out std_logic_vector(15 downto 0);
+		I2_opr1:out std_logic_vector(15 downto 0);
+		I2_opr2:out std_logic_vector(15 downto 0)
 		);
 end rat;
 
@@ -33,7 +33,7 @@ process(reset,I1_wr_dest, I2_wr_dest)
 begin
 	if(reset='1') then
 		init: for k in 0 to 7 loop
-			stack(k)<=std_logic_vector(to_unsigned(k,6));
+			table(k)<=std_logic_vector(to_unsigned(k,6));
 		end loop init;
 	end if;
 	

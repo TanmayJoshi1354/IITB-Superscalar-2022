@@ -1,4 +1,6 @@
 RR-RS/*
 Load-Store-Pipeline/*
+Load-Store-Queue/*
 !RR-RS/*.vhd
 !Load-Store-Pipeline/*.vhd
+!Load-Store-Queue/*.vhd
