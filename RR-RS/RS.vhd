@@ -15,19 +15,19 @@ entity rs is
 		I1_v2_in: in std_logic_vector(0 downto 0);
 		I1_dest_reg_in: in std_logic_vector(5 downto 0);
 		I1_opcode_in: in std_logic_vector(3 downto 0);
+		I1_dec_in: in std_logic_vector(2 downto 0);
 		I2_opr1_in:in std_logic_vector(15 downto 0);
 		I2_opr2_in:in std_logic_vector(15 downto 0);
 		I2_v1_in: in std_logic_vector(0 downto 0);
 		I2_v2_in: in std_logic_vector(0 downto 0);
 		I2_dest_reg_in: in std_logic_vector(5 downto 0);
 		I2_opcode_in: in std_logic_vector(3 downto 0);
+		I2_dec_in: in std_logic_vector(2 downto 0);
 		
 		inst_cz: in integer;
 		cin: in std_logic;
 		zin: in std_logic;
 		cz_dep: in std_logic_vector(1 downto 0);
-		k1: in integer;
-		k2: in integer;
 		
 		--LMSM
 		lmsm: in std_logic;
@@ -38,13 +38,32 @@ entity rs is
 		I1_opr2_out:out std_logic_vector(15 downto 0);
 		I1_dest_reg_out: out std_logic_vector(2 downto 0);
 		I1_opcode_out: out std_logic_vector(3 downto 0);
+		I1_dec_out: out std_logic_vector(2 downto 0);
+		
 		I2_opr1_out:out std_logic_vector(15 downto 0);
 		I2_opr2_out:out std_logic_vector(15 downto 0);
 		I2_dest_reg_out: out std_logic_vector(2 downto 0);
 		I2_opcode_out: out std_logic_vector(3 downto 0);
-		v: out std_logic_vector(99 downto 0);
+		I2_dec_out: out std_logic_vector(2 downto 0);
+		
+		I3_opr1_out:out std_logic_vector(15 downto 0);
+		I3_opr2_out:out std_logic_vector(15 downto 0);
+		I3_dest_reg_out: out std_logic_vector(2 downto 0);
+		I3_opcode_out: out std_logic_vector(3 downto 0);
+		I3_dec_out: out std_logic_vector(2 downto 0);
+		I3_dest: out std_logic_vector(5 downto 0);
+		
+		I4_opr1_out:out std_logic_vector(15 downto 0);
+		I4_opr2_out:out std_logic_vector(15 downto 0);
+		I4_dest_reg_out: out std_logic_vector(2 downto 0);
+		I4_opcode_out: out std_logic_vector(3 downto 0);
+		I4_dec_out: out std_logic_vector(2 downto 0);
+		I4_dest: out std_logic_vector(5 downto 0);
+		
 		inst_num1: out integer;
-		inst_num2: out integer
+		inst_num2: out integer;
+		inst_num3: out integer;
+		inst_num4: out integer
 	);
 end rs;
 
@@ -52,19 +71,24 @@ architecture rs1 of rs is
 type rs_index is array(99 downto 0) of std_logic_vector(44 downto 0);
 ---Mapping of each entry: Opcode, OPR1, V1, OPR2, V2, Renamed Register index, V
 type inst_index is array(0 to 99) of integer;
+type dec_index is array(0 to 99) of std_logic_vector(2 downto 0);
 signal res_stn: rs_index;
 signal inst: inst_index:=(others=>0);
+signal v: std_logic_vector(99 downto 0);
 shared variable i: integer:=0;
 signal busy: std_logic_vector(99 downto 0):=(others=>'0');
 signal entry: std_logic_vector(44 downto 0);
 signal c: std_logic_vector(99 downto 0):=(others=>'0');
 signal z: std_logic_vector(99 downto 0):=(others=>'0');
 signal czv: std_logic_vector(99 downto 0):=(others=>'0');
+signal dec: dec_index:=(others=>"000");
 signal temp: integer;
 signal lmsm_tempcheck: std_logic_vector(43 downto 0):=(others=>'Z');
+signal opcode: std_logic_vector(3 downto 0);
 
 begin
-process(clk, rst, wr1, wr2, clr, busy, cz_dep, c, z, entry, res_stn, inst)
+process(clk, rst, wr1, wr2, clr, busy, cz_dep, c, z, entry, res_stn, inst, v, dec)
+variable k1,k2,k3,k4: integer;
 begin
 	if rising_edge(clk) then
 		if(rst='1') then
@@ -81,6 +105,7 @@ begin
 						if(busy(k)='0') then
 							inst(k)<=i;
 							res_stn(k)<=(I1_opcode_in & I1_opr1_in & I1_v1_in & I1_opr2_in & I1_v2_in & I1_dest_reg_in & I1_v1_in and I1_v2_in);
+							dec(k)<=I1_dec_in;
 							i:=i+1;
 							busy(k)<='1';							
 							exit;
@@ -92,6 +117,7 @@ begin
 						if(busy(k)='0') then
 							inst(k)<=i;
 							res_stn(k)<=(I2_opcode_in & I2_opr1_in & I2_v1_in & I2_opr2_in & I2_v2_in & I2_dest_reg_in & I2_v1_in and I2_v2_in);
+							dec(k)<=I2_dec_in;
 							i:=i+1;
 							busy(k)<='1';							
 							exit;
@@ -183,7 +209,6 @@ begin
 				end loop insert_entry10;
 			end if;
 		end if;	
-	end if;
 		
 	valid: for k in 0 to 99 loop
 		entry<=res_stn(k);
@@ -195,27 +220,67 @@ begin
 		v(k)<=entry(0);
 		res_stn(k)<=entry;
 	end loop valid;
-end process;
-
-process(k1, k2, res_stn, inst)
-begin
-	------Change if better method found, current method could stagnate ROB
-		if(k1<100 and k1>=0) then
-			I1_opr1_out<=res_stn(k1)(40 downto 25);
-			I1_opr2_out<=res_stn(k1)(23 downto 8);
-			--I1_dest_reg_out<=res_stn(k1)(5 downto 0);
-			I1_opcode_out<=res_stn(k1)(44 downto 41);
-			inst_num1<=inst(k1);
-			busy(k1)<='0';
-		end if;
-		if(k2<100 and k2>=0) then
-			I2_opr1_out<=res_stn(k2)(40 downto 25);
-			I2_opr2_out<=res_stn(k2)(23 downto 8);
-			--I1_dest_reg_out<=res_stn(k2)(5 downto 0);
-			I2_opcode_out<=res_stn(k2)(44 downto 41);
-			inst_num2<=inst(k2);
-			busy(k2)<='0';
-		end if;
+	
+	k1:=100;
+	k2:=100;
+	k3:=100;
+	k4:=100;
+	check: for k in 0 to 99 loop
+		opcode<=res_stn(k)(44 downto 41);
+		if(opcode(3 downto 2)="00" or opcode(3 downto 2)="10") then
+			if(busy(k)='1' and v(k)='1' and k1=100) then
+				k1:=k;
+			elsif(busy(k)='1' and v(k)='1' and k2=100) then
+				k2:=k;
+			end if;
+		else
+			if(busy(k)='1' and v(k)='1' and k3=100) then
+				k3:=k;
+			elsif(busy(k)='1' and v(k)='1' and k4=100) then
+				k4:=k;
+			end if;
+			end if;
+	end loop check;
+	
+	
+	if(k1<100 and k1>=0) then
+		I1_opr1_out<=res_stn(k1)(40 downto 25);
+		I1_opr2_out<=res_stn(k1)(23 downto 8);
+		I1_opcode_out<=res_stn(k1)(44 downto 41);
+		I1_dec_out<=dec(k1);
+		inst_num1<=inst(k1);
+		busy(k1)<='0';
+	end if;
+	
+	if(k2<100 and k2>=0) then
+		I2_opr1_out<=res_stn(k2)(40 downto 25);
+		I2_opr2_out<=res_stn(k2)(23 downto 8);
+		I2_opcode_out<=res_stn(k2)(44 downto 41);
+		I2_dec_out<=dec(k2);
+		inst_num2<=inst(k2);
+		busy(k2)<='0';
+	end if;
+	
+	if(k3<100 and k3>=0) then
+		I3_opr1_out<=res_stn(k3)(40 downto 25);
+		I3_opr2_out<=res_stn(k3)(23 downto 8);
+		I3_opcode_out<=res_stn(k3)(44 downto 41);
+		I3_dec_out<=dec(k3);
+		I3_dest<=res_stn(k3)(6 downto 1);
+		inst_num3<=inst(k3);
+		busy(k3)<='0';
+	end if;
+	
+	if(k4<100 and k4>=0) then
+		I4_opr1_out<=res_stn(k4)(40 downto 25);
+		I4_opr2_out<=res_stn(k4)(23 downto 8);
+		I4_opcode_out<=res_stn(k4)(44 downto 41);
+		I4_dec_out<=dec(k4);
+		I4_dest<=res_stn(k4)(6 downto 1);
+		inst_num4<=inst(k4);
+		busy(k4)<='0';
+	end if;
+end if;
 end process;
 
 process(inst_cz, inst, cin, zin, inst, temp)
