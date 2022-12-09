@@ -7,12 +7,12 @@ entity AGMA_reg is
 		clk: in std_logic;
 		clr: in std_logic;
 		wr: in std_logic;
-		inst_num_in: in integer;
+		inst_num_in: in std_logic_vector(6 downto 0);
 		mem_addr_in: in std_logic_vector(15 downto 0);
 		inst_opcode_in: in std_logic_vector(3 downto 0);
 		data_in: in std_logic_vector(15 downto 0);
 		
-		inst_num_out: out integer;
+		inst_num_out: out std_logic_vector(6 downto 0);
 		mem_addr_out: out std_logic_vector(15 downto 0);
 		inst_opcode_out: out std_logic_vector(3 downto 0);
 		data_out: out std_logic_vector(15 downto 0)
@@ -24,7 +24,7 @@ begin
 process(clk, clr)
 begin
 	if(clr='1') then
-		inst_num_out<=0;
+		inst_num_out<=(others=>'0');
 		mem_addr_out<=(others=>'0');
 		inst_opcode_out<="0000";
 		data_out<=(others=>'0');

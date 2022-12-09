@@ -8,7 +8,7 @@ entity ls_pipeline is
 		clk: in std_logic;
 		clr: in std_logic;
 		wr_reg: in std_logic;
-		inst_num_in: in integer;
+		inst_num_in: in std_logic_vector(6 downto 0);
 		inst_opcode_in: in std_logic_vector(3 downto 0);
 		opr1: in std_logic_vector(15 downto 0);
 		opr2: in std_logic_vector(15 downto 0);
@@ -16,7 +16,7 @@ entity ls_pipeline is
 		sq_data_in: in std_logic_vector(15 downto 0);
 	   s_m2: in std_logic_vector(1 downto 0);
 		
-		inst_num_out: out integer;
+		inst_num_out: out std_logic_vector(6 downto 0);
 		inst_opcode_out: out std_logic_vector(3 downto 0);
 		mem_addr_out: out std_logic_vector(15 downto 0);
 		data_out: out std_logic_vector(15 downto 0)
@@ -39,12 +39,12 @@ architecture ls1 of ls_pipeline is
 			clk: in std_logic;
 			clr: in std_logic;
 			wr: in std_logic;
-			inst_num_in: in integer;
+			inst_num_in: in std_logic_vector(6 downto 0);
 			mem_addr_in: in std_logic_vector(15 downto 0);
 			inst_opcode_in: in std_logic_vector(3 downto 0);
 			data_in:in std_logic_vector(15 downto 0);
 			
-			inst_num_out: out integer;
+			inst_num_out: out std_logic_vector(6 downto 0);
 			mem_addr_out: out std_logic_vector(15 downto 0);
 			inst_opcode_out: out std_logic_vector(3 downto 0);
 			data_out: out std_logic_vector(15 downto 0)

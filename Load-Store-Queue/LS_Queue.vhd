@@ -8,24 +8,26 @@ entity LS_Queue is
 			
 			--Write new entry
 			wr1: in std_logic; --controller
-			I1_num_in: in integer; --Dispatch buffer
+			I1_num_in: in std_logic_vector(6 downto 0); --Dispatch buffer
 			l1_flag: in std_logic; --Dispatch buffer
 			wr2: in std_logic; --controller
-			I2_num_in: in integer; --Dispatch buffer
+			I2_num_in: in std_logic_vector(6 downto 0); --Dispatch buffer
 			l2_flag: in std_logic; --Dispatch buffer
 			
 			--Update valid bit
-			I3_num_in: in integer; --LS_Pipeline
+			I3_num_in: in std_logic_vector(6 downto 0); --LS_Pipeline
 			I3_addr: in std_logic_vector(15 downto 0); --LS_pipeline
 			l3_flag: in std_logic; --LS_Pipeline
 			I3_store_val: in std_logic_vector(15 downto 0); --LS_pipeline
-			I4_num_in: in integer; --LS_Pipeline
+			I4_num_in: in std_logic_vector(6 downto 0); --LS_Pipeline
 			I4_addr: in std_logic_vector(15 downto 0); --LS_pipeline
 			l4_flag: in std_logic; --LS_Pipeline
 			I4_store_val: in std_logic_vector(15 downto 0); --LS_pipeline
 			
-			sel: out std_logic_vector(1 downto 0); --LS_pipeline
-			load_val: out std_logic_vector(15 downto 0) --LS_pipeline
+			sel1: out std_logic_vector(1 downto 0); --LS_pipeline
+			sel2: out std_logic_vector(1 downto 0); --LS_pipeline
+			load_val1: out std_logic_vector(15 downto 0); --LS_pipeline
+			load_val2: out std_logic_vector(15 downto 0) --LS_pipeline
 			-- if the entry is available in the store queue, use that value in the load instr
 			);
 		end LS_Queue;
@@ -37,7 +39,7 @@ entity LS_Queue is
 				type columnInt is array(0 to 127) of integer;
 				
 				signal LQ_addr: column16 := (others=>(others=>'0'));
-				signal LQ_Inum, SQ_Inum: columnInt:=(others=>0);
+				signal LQ_Inum, SQ_Inum: column7:=(others=>(others=>'0'));
 				signal LQ_head, LQ_tail:columnInt := (others=>0);				
 				shared variable head_ptrS, tail_ptrS: integer range 0 to 127; --defining head and tail pointers of the store queue with loopback
 				shared variable head_ptrL, tail_ptrL: integer range 0 to 127; --defining head and tail pointers of the load queue with loopback				
@@ -51,13 +53,15 @@ entity LS_Queue is
 					begin
 					if rising_edge(clk) then 
 						if reset='1' then
-							sel<="00";
-							load_val<=(others=>'0');
+							sel1<="00";
+							sel2<="00";
+							load_val1<=(others=>'0');
+							load_val2<=(others=>'0');
 							LQ_addr<=(others=>(others=>'0'));
 							SQ_addr<=(others=>(others=>'0'));
 							SQ_value<=(others=>(others=>'0'));
-							LQ_Inum<=(others=>0);
-							SQ_Inum<=(others=>0);
+							LQ_Inum<=(others=>(others=>'0'));
+							SQ_Inum<=(others=>(others=>'0'));
 							head_ptrS:=0;
 							head_ptrL:=0;
 							tail_ptrS:=0;
@@ -112,14 +116,14 @@ entity LS_Queue is
 								if LQ_addr(i) = I3_addr then
 									L3: for j in 0 to 127 loop
 										if SQ_addr(j) = I3_addr and SQ_valid(j)='1' then
-											load_val <= SQ_value(j);
-										   sel<="01";
+											load_val1 <= SQ_value(j);
+										   sel1<="01";
 											exit;
 										elsif SQ_addr(j)=I3_addr and SQ_valid(j)='0' then
-											sel<="00";
+											sel1<="00";
 											exit;
 										else
-											sel<="10";
+											sel1<="10";
 										end if;
 										exit when j=LQ_tail(i);
 									end loop L3;
@@ -132,14 +136,14 @@ entity LS_Queue is
 								if LQ_addr(i) = I4_addr then
 									L6: for j in 0 to 127 loop
 										if SQ_addr(j) = I4_addr and SQ_valid(j)='1' then
-											load_val <= SQ_value(j);
-										   sel<="01";
+											load_val2 <= SQ_value(j);
+										   sel2<="01";
 											exit;
 										elsif SQ_addr(j)=I4_addr and SQ_valid(j)='0' then
-											sel<="00";
+											sel2<="00";
 											exit;
 										else
-											sel<="10";
+											sel2<="10";
 										end if;
 										exit when j=LQ_tail(i);
 									end loop L6;

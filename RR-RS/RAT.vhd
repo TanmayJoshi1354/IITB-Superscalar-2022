@@ -28,10 +28,10 @@ entity rat is
 		I_opr7_in: in std_logic_vector(5 downto 0);
 		I_opr8_in: in std_logic_vector(5 downto 0);
 		
-		I1_opr1:out std_logic_vector(15 downto 0);
-		I1_opr2:out std_logic_vector(15 downto 0);
-		I2_opr1:out std_logic_vector(15 downto 0);
-		I2_opr2:out std_logic_vector(15 downto 0);
+		I1_opr1:out std_logic_vector(5 downto 0);
+		I1_opr2:out std_logic_vector(5 downto 0);
+		I2_opr1:out std_logic_vector(5 downto 0);
+		I2_opr2:out std_logic_vector(5 downto 0);
 		
 		I_opr1: out std_logic_vector(15 downto 0);
 		I_opr2: out std_logic_vector(15 downto 0);
