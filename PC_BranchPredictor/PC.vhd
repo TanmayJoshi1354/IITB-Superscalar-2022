@@ -24,7 +24,7 @@ begin
 				elsif (instr(15 downto 12) = "1001" or instr(15 downto 12) = "1011") then
 					pc_out <= std_logic_vector(unsigned(pc_in)+unsigned(instr(8 downto 0)));
 				else
-					pc_out <= std_logic_vector(unsigned(pc_in)+ 1);
+					pc_out <= std_logic_vector(unsigned(pc_in)+ 2);
 				end if;
 		    else
 				pc_out <= pc_in;
