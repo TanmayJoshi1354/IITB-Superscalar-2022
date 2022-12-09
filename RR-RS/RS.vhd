@@ -30,7 +30,6 @@ entity rs is
 		inst_cz: in std_logic_vector(6 downto 0);
 		cin: in std_logic;
 		zin: in std_logic;
-		cz_dep: in std_logic_vector(1 downto 0);
 		
 		--LMSM
 		lmsm: in std_logic;
@@ -103,7 +102,7 @@ signal opcode: std_logic_vector(3 downto 0);
 signal PC: pc_index;
 
 begin
-process(clk, rst, wr1, wr2, busy, cz_dep, c, z, entry, res_stn, inst, v, dec, wb_wr1, wb_din1, wb-Addrin1, wb_wr2, wb_din2, wb_Addrin2)
+process(clk, rst, wr1, wr2, busy, c, z, entry, res_stn, inst, v, dec, wb_wr1, wb_din1, wb-Addrin1, wb_wr2, wb_din2, wb_Addrin2)
 variable k1,k2,k3,k4: integer;
 begin
 	if rising_edge(clk) then
@@ -145,7 +144,7 @@ begin
 							if(wr1='1') then
 								inst(k)<=I2_inst_num_in;
 							elsif(wr2='1') then
-								inst(k)<=I2_inst_num_in;
+								inst(k)<=I1_inst_num_in;
 							end if;
 							res_stn(k)<=(Iout0 & Iout0(23 downto 23) and Iout0(6 downto 6));
 							busy(k)<='1';							
@@ -159,7 +158,7 @@ begin
 							if(wr1='1') then
 								inst(k)<=I2_inst_num_in;
 							elsif(wr2='1') then
-								inst(k)<=I2_inst_num_in;
+								inst(k)<=I1_inst_num_in;
 							end if;
 							res_stn(k)<=(Iout1 & Iout1(23 downto 23) and Iout1(6 downto 6));
 							busy(k)<='1';							
@@ -173,7 +172,7 @@ begin
 							if(wr1='1') then
 								inst(k)<=I2_inst_num_in;
 							elsif(wr2='1') then
-								inst(k)<=I2_inst_num_in;
+								inst(k)<=I1_inst_num_in;
 							end if;
 							res_stn(k)<=(Iout2 & Iout2(23 downto 23) and Iout2(6 downto 6));
 							busy(k)<='1';							exit;
@@ -186,7 +185,7 @@ begin
 							if(wr1='1') then
 								inst(k)<=I2_inst_num_in;
 							elsif(wr2='1') then
-								inst(k)<=I2_inst_num_in;
+								inst(k)<=I1_inst_num_in;
 							end if;
 							res_stn(k)<=(Iout3 & Iout3(23 downto 23) and Iout3(6 downto 6));
 							busy(k)<='1';							exit;
@@ -199,7 +198,7 @@ begin
 							if(wr1='1') then
 								inst(k)<=I2_inst_num_in;
 							elsif(wr2='1') then
-								inst(k)<=I2_inst_num_in;
+								inst(k)<=I1_inst_num_in;
 							end if;
 							res_stn(k)<=(Iout4 & Iout4(23 downto 23) and Iout4(6 downto 6));
 							i:=i+1;
@@ -213,7 +212,7 @@ begin
 							if(wr1='1') then
 								inst(k)<=I2_inst_num_in;
 							elsif(wr2='1') then
-								inst(k)<=I2_inst_num_in;
+								inst(k)<=I1_inst_num_in;
 							end if;
 							res_stn(k)<=(Iout5 & Iout5(23 downto 23) and Iout5(6 downto 6));
 							busy(k)<='1';							exit;
@@ -226,7 +225,7 @@ begin
 							if(wr1='1') then
 								inst(k)<=I2_inst_num_in;
 							elsif(wr2='1') then
-								inst(k)<=I2_inst_num_in;
+								inst(k)<=I1_inst_num_in;
 							end if;
 							res_stn(k)<=(Iout6 & Iout6(23 downto 23) and Iout6(6 downto 6));
 							busy(k)<='1';							
@@ -240,7 +239,7 @@ begin
 							if(wr1='1') then
 								inst(k)<=I2_inst_num_in;
 							elsif(wr2='1') then
-								inst(k)<=I2_inst_num_in;
+								inst(k)<=I1_inst_num_in;
 							end if;
 							res_stn(k)<=(Iout7 & Iout7(23 downto 23) and Iout7(6 downto 6));
 							busy(k)<='1';							exit;
@@ -251,8 +250,10 @@ begin
 		
 	valid: for k in 0 to 99 loop
 		entry<=res_stn(k);
-		if(cz_dep="01" or cz_dep="10") then
-			entry(0)<=entry(7) and entry(24) and c(k) and z(k);
+		if(dec(k)(2 downto 1)="10") then
+			entry(0)<=entry(7) and entry(24) and c(k);
+		elsif(dec(k)(2 downto 1)="01") then
+			entry(0)<=entry(7) and entry(24) and c(k);
 		else
 			entry(0)<=entry(7) and entry(24);
 		end if;

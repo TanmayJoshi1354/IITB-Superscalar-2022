@@ -36,6 +36,10 @@ entity renamer is
 		I1_opr2_out: out std_logic_vector(15 downto 0);
 		I2_opr1_out: out std_logic_vector(15 downto 0);
 		I2_opr2_out: out std_logic_vector(15 downto 0);
+		I1_opr1_v_out: out std_logic_vector(15 downto 0);
+		I1_opr2_v_out: out std_logic_vector(15 downto 0);
+		I2_opr1_v_out: out std_logic_vector(15 downto 0);
+		I2_opr2_v_out: out std_logic_vector(15 downto 0);
 		I1_dest_rr: out std_logic_vector(5 downto 0);
 		I2_dest_rr: out std_logic_vector(5 downto 0);
 			
@@ -196,6 +200,10 @@ begin
 	
 	I1_dest_rr<=I1_dest_rr_temp;
 	I2_dest_rr<=I2_dest_rr_temp;
+	I1_opr1_v_out<=I1_opr1_v;
+	I1_opr2_v_out<=I1_opr2_v;
+	I2_opr1_v_out<=I2_opr1_v;
+	I2_opr2_v_out<=I2_opr2_v;
 	
 	process(lmsm,valid_lmsm,I1_opr1_v, I1_opr2_v, I2_opr1_v, I2_opr2_v, I_opcode)
 	begin

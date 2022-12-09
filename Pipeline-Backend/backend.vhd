@@ -4,64 +4,40 @@ use ieee.numeric_std.all;
 
 entity backend is
 	port(
+		clk: in std_logic;
+		rst: in std_logic;
+		wr1: in std_logic;
+		wr2: in std_logic;
+		I1_opr1_in:in std_logic_vector(15 downto 0);
+		I1_opr2_in:in std_logic_vector(15 downto 0);
+		I1_v1_in: in std_logic_vector(0 downto 0);
+		I1_v2_in: in std_logic_vector(0 downto 0);
+		I1_dest_reg_in: in std_logic_vector(5 downto 0);
+		I1_opcode_in: in std_logic_vector(3 downto 0);
+		I1_dec_in: in std_logic_vector(2 downto 0);
+		I1_PC_in: in std_logic_vector(15 downto 0);
+		I1_inst_num_in: in std_logic_vector(6 downto 0);
+		I2_opr1_in:in std_logic_vector(15 downto 0);
+		I2_opr2_in:in std_logic_vector(15 downto 0);
+		I2_v1_in: in std_logic_vector(0 downto 0);
+		I2_v2_in: in std_logic_vector(0 downto 0);
+		I2_dest_reg_in: in std_logic_vector(5 downto 0);
+		I2_opcode_in: in std_logic_vector(3 downto 0);
+		I2_dec_in: in std_logic_vector(2 downto 0);
+		I2_PC_in: in std_logic_vector(15 downto 0);
+		I2_inst_num_in: in std_logic_vector(6 downto 0);
+		
+		
 		
 	);
 end backend;
 
 architecture b1 of backend is
 	
-	component renamer is
-		port(
-			reset: in std_logic;
-			clk: in std_logic;
-			lmsm: in std_logic;
-			I1_dest: in std_logic_vector(2 downto 0);
-			I1_wr_dest: in std_logic;
-			I2_dest: in std_logic_vector(2 downto 0);
-			I2_wr_dest: in std_logic;
-			wr_stack1: in std_logic;
-			completed_rr1: in std_logic_vector(5 downto 0);
-			wr_stack2: in std_logic;
-			completed_rr2: in std_logic_vector(5 downto 0);
-			I_opcode: in std_logic_vector(3 downto 0);
-			
-			I1_src1:in std_logic_vector(2 downto 0);
-			I1_src2:in std_logic_vector(2 downto 0);
-			I2_src1:in std_logic_vector(2 downto 0);
-			I2_src2:in std_logic_vector(2 downto 0);
-			
-			clr_prf: in std_logic;
-			
-			D_in1: in std_logic_vector(15 downto 0);
-			Addr_in1: in std_logic_vector(5 downto 0);
-			wr1: in std_logic;
-			D_in2: in std_logic_vector(15 downto 0);
-			Addr_in2: in std_logic_vector(5 downto 0);
-			wr2: in std_logic;	
-		
-			I1_opr1_out: out std_logic_vector(15 downto 0);
-			I1_opr2_out: out std_logic_vector(15 downto 0);
-			I2_opr1_out: out std_logic_vector(15 downto 0);
-			I2_opr2_out: out std_logic_vector(15 downto 0);
-			I1_dest_rr: out std_logic_vector(5 downto 0);
-			I2_dest_rr: out std_logic_vector(5 downto 0);
-				
-			I_opr1_out: out std_logic_vector(15 downto 0);
-			I_opr2_out: out std_logic_vector(15 downto 0);
-			I_opr3_out: out std_logic_vector(15 downto 0);
-			I_opr4_out: out std_logic_vector(15 downto 0);
-			I_opr5_out: out std_logic_vector(15 downto 0);
-			I_opr6_out: out std_logic_vector(15 downto 0);
-			I_opr7_out: out std_logic_vector(15 downto 0);
-			I_opr8_out: out std_logic_vector(15 downto 0)
-		);
-	end component;
-	
 	entity rs is
 		port(
 			clk: in std_logic;
 			rst: in std_logic;
-			clr: in std_logic;
 			wr1: in std_logic;
 			wr2: in std_logic;
 			I1_opr1_in:in std_logic_vector(15 downto 0);
@@ -138,7 +114,7 @@ architecture b1 of backend is
 		);
 	end component;
 	
-	entity RoB is
+	component RoB is
 		port(
 			rst, clk, DBWrite_en1, DBWrite_en2, DBWrite_en3, en_write: in std_logic;--remove write enable if not needed
 			d_in1, d_in2: in std_logic_vector(53 downto 0);
@@ -153,5 +129,80 @@ architecture b1 of backend is
 			 
 			rob_full, rob_empty: out std_logic;
 			rob_index: out integer	--indicates which rob entry is free
-		 );
+		);
 	end component;
+	
+	component AL is 
+		port(instruction: in std_logic_vector(40 downto 0);
+			  Inum: in std_logic_vector(6 downto 0);
+			  Inumrob: out std_logic_vector(6 downto 0);
+			  clock: in std_logic;
+			  result: out std_logic_vector(15 downto 0);
+			  Carry,Zero: out std_logic;
+			  forjlr: out std_logic_VECTOr(15 downto 0));
+	end component;
+	
+	component ls_pipeline is
+		port(
+			clk: in std_logic;
+			clr: in std_logic;
+			wr_reg: in std_logic;
+			inst_num_in: in integer;
+			inst_opcode_in: in std_logic_vector(3 downto 0);
+			opr1: in std_logic_vector(15 downto 0);
+			opr2: in std_logic_vector(15 downto 0);
+			mem_data_in: in std_logic_vector(15 downto 0);
+			sq_data_in: in std_logic_vector(15 downto 0);
+			s_m2: in std_logic_vector(1 downto 0);
+			
+			inst_num_out: out integer;
+			inst_opcode_out: out std_logic_vector(3 downto 0);
+			mem_addr_out: out std_logic_vector(15 downto 0);
+			data_out: out std_logic_vector(15 downto 0)
+		);
+	end component;
+	
+	component LS_Queue is 
+		port(
+			clk, reset: in std_logic; --In
+			
+			--Write new entry
+			wr1: in std_logic; --controller
+			I1_num_in: in integer; --Dispatch buffer
+			l1_flag: in std_logic; --Dispatch buffer
+			wr2: in std_logic; --controller
+			I2_num_in: in integer; --Dispatch buffer
+			l2_flag: in std_logic; --Dispatch buffer
+			
+			--Update valid bit
+			I3_num_in: in integer; --LS_Pipeline
+			I3_addr: in std_logic_vector(15 downto 0); --LS_pipeline
+			l3_flag: in std_logic; --LS_Pipeline
+			I3_store_val: in std_logic_vector(15 downto 0); --LS_pipeline
+			I4_num_in: in integer; --LS_Pipeline
+			I4_addr: in std_logic_vector(15 downto 0); --LS_pipeline
+			l4_flag: in std_logic; --LS_Pipeline
+			I4_store_val: in std_logic_vector(15 downto 0); --LS_pipeline
+			
+			sel: out std_logic_vector(1 downto 0); --LS_pipeline
+			load_val: out std_logic_vector(15 downto 0) --LS_pipeline
+			-- if the entry is available in the store queue, use that value in the load instr
+		);
+	end component;
+	
+	component Dmem is
+		port (clock : in std_logic;
+				Write_Enable1 : in std_logic;
+				Write_Address1 : in std_logic_vector(15 downto 0);
+				Read_Address1 : in std_logic_vector(15 downto 0);
+				Write_Data_In1 : in std_logic_vector(15 downto 0);
+				Read_Data_Out1 : out std_logic_vector(15 downto 0);
+				Write_Enable2 : in std_logic;
+				Write_Address2 : in std_logic_vector(15 downto 0);
+				Read_Address2 : in std_logic_vector(15 downto 0);
+				Write_Data_In2 : in std_logic_vector(15 downto 0);
+				Read_Data_Out2 : out std_logic_vector(15 downto 0));
+	end component;
+	
+begin
+	reservation_stn: rs port map ()
