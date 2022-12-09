@@ -88,7 +88,7 @@ type inst_index is array(0 to 99) of std_logic_vector(6 downto 0);
 type dec_index is array(0 to 99) of std_logic_vector(2 downto 0);
 type pc_index is array(0 to 99) of std_logic_vector(15 downto 0);
 signal res_stn: rs_index;
-signal inst: inst_index:=(others=>0);
+signal inst: inst_index:=(others=>(others=>'0'));
 signal v: std_logic_vector(99 downto 0);
 signal busy: std_logic_vector(99 downto 0):=(others=>'0');
 signal entry: std_logic_vector(44 downto 0);
@@ -96,13 +96,13 @@ signal c: std_logic_vector(99 downto 0):=(others=>'0');
 signal z: std_logic_vector(99 downto 0):=(others=>'0');
 signal czv: std_logic_vector(99 downto 0):=(others=>'0');
 signal dec: dec_index:=(others=>"000");
-signal temp: integer;
+signal temp: std_logic_vector(6 downto 0);
 signal lmsm_tempcheck: std_logic_vector(43 downto 0):=(others=>'Z');
 signal opcode: std_logic_vector(3 downto 0);
 signal PC: pc_index;
 
 begin
-process(clk, rst, wr1, wr2, busy, c, z, entry, res_stn, inst, v, dec, wb_wr1, wb_din1, wb-Addrin1, wb_wr2, wb_din2, wb_Addrin2)
+process(clk, rst, wr1, wr2, busy, c, z, entry, res_stn, inst, v, dec, wb_wr1, wb_din1, wb_Addrin1, wb_wr2, wb_din2, wb_Addrin2)
 variable k1,k2,k3,k4: integer;
 begin
 	if rising_edge(clk) then
@@ -136,7 +136,6 @@ begin
 					end loop insert_entry2;
 				end if;
 			end if;
-		end if;
 		if(lmsm='1') then
 			if(Iout0/=lmsm_tempcheck) then
 				insert_entry3: for k in 0 to 99 loop
@@ -201,7 +200,6 @@ begin
 								inst(k)<=I1_inst_num_in;
 							end if;
 							res_stn(k)<=(Iout4 & Iout4(23 downto 23) and Iout4(6 downto 6));
-							i:=i+1;
 							busy(k)<='1';							exit;
 						end if;
 				end loop insert_entry7;
@@ -327,23 +325,24 @@ begin
 	
 	if(wb_wr1='1') then
 		L1: for k in 0 to 99 loop
-			if(res_stn(k)(24 downto 24)='0' and res_stn(k)(40 downto 25)=wb_Addrin1) then
+			if(res_stn(k)(24)='0' and res_stn(k)(30 downto 25)=wb_Addrin1) then
 				res_stn(k)(40 downto 25)<=wb_din1;
-				res_stn(k)(24 downto 24)<='1';
+				res_stn(k)(24)<='1';
 			end if;
-			if(res_stn(k)(7 downto 7)='0' and res_stn(k)(23 downto 8)=wb_Addrin1) then
+			if(res_stn(k)(7)='0' and res_stn(k)(13 downto 8)=wb_Addrin1) then
 				res_stn(k)(23 downto 8)<=wb_din1;
-				res_stn(k)(7 downto 7)<='1';
+				res_stn(k)(7)<='1';
 			end if;
-			if(res_stn(k)(24 downto 24)='0' and res_stn(k)(40 downto 25)=wb_Addrin2) then
+			if(res_stn(k)(24)='0' and res_stn(k)(40 downto 25)=wb_Addrin2) then
 				res_stn(k)(40 downto 25)<=wb_din2;
-				res_stn(k)(24 downto 24)<='1';
+				res_stn(k)(24)<='1';
 			end if;
-			if(res_stn(k)(7 downto 7)='0' and res_stn(k)(23 downto 8)=wb_Addrin2) then
+			if(res_stn(k)(7)='0' and res_stn(k)(23 downto 8)=wb_Addrin2) then
 				res_stn(k)(23 downto 8)<=wb_din2;
-				res_stn(k)(7 downto 7)<='1';
+				res_stn(k)(7)<='1';
 			end if;
-		end loop L2;
+		end loop L1;
+	end if;
 end if;
 end process;
 
@@ -354,7 +353,7 @@ begin
 			c(k)<=cin;
 			z(k)<=zin;
 		end if;
-		temp<=inst_cz+1;
+		temp<=std_logic_vector(unsigned(inst_cz)+1)(6 downto 0);
 		if(inst(k)=temp) then
 			czv(k)<='1';
 		end if;

@@ -47,7 +47,7 @@ architecture prf_arch of prf is
 	signal reg_bank: reg_bank_type := (others=>"0000000000000000");
 begin
 	--Write Back
-	process(wr, clk)
+	process(wr1,wr2, clk)
 	begin
 		if rising_edge(clk) then
 			if(wr1='1') then
@@ -107,5 +107,6 @@ begin
 			valid(to_integer(unsigned(I_addr(35 downto 30))))<='0';
 			valid(to_integer(unsigned(I_addr(41 downto 36))))<='0';
 			valid(to_integer(unsigned(I_addr(47 downto 42))))<='0';
+		end if;
 	end process;
 end prf_arch;

@@ -36,10 +36,10 @@ entity renamer is
 		I1_opr2_out: out std_logic_vector(15 downto 0);
 		I2_opr1_out: out std_logic_vector(15 downto 0);
 		I2_opr2_out: out std_logic_vector(15 downto 0);
-		I1_opr1_v_out: out std_logic_vector(15 downto 0);
-		I1_opr2_v_out: out std_logic_vector(15 downto 0);
-		I2_opr1_v_out: out std_logic_vector(15 downto 0);
-		I2_opr2_v_out: out std_logic_vector(15 downto 0);
+		I1_opr1_v_out: out std_logic;
+		I1_opr2_v_out: out std_logic;
+		I2_opr1_v_out: out std_logic;
+		I2_opr2_v_out: out std_logic;
 		I1_dest_rr: out std_logic_vector(5 downto 0);
 		I2_dest_rr: out std_logic_vector(5 downto 0);
 			
@@ -189,13 +189,13 @@ begin
 										I_dest_rr5=>I_opr5_rr, I_dest_rr6=>I_opr6_rr, I_dest_rr7=>I_opr7_rr, 
 										I_dest_rr8=>I_opr8_rr);
 	
-	prf1: prf port map(clk: in std_logic=>clk, clr_prf=>reset, I1_Add1=>I1_opr1_rat, I1_Add2=>I1_opr2_rat,
+	prf1: prf port map(clk=>clk, clr_prf=>reset, I1_Add1=>I1_opr1_rat, I1_Add2=>I1_opr2_rat,
 							 I2_Add1=>I2_opr1_rat, I2_Add2=>I2_opr2_rat, D_in1=>D_in1, Addr_in1=>Addr_in1, wr1=>wr1,
 							 D_in2=>D_in2, Addr_in2=>Addr_in2, wr2=>wr2, I1_wr_dest=>I1_wr_dest, I1_dest_rr=>I1_dest_rr_temp,
 							 I2_wr_dest=>I2_wr_dest, I2_dest_rr=>I2_dest_rr_temp, I1_opr1=>I1_opr1_prf, I1_opr2=>I1_opr2_prf, 
 							 I2_opr1=>I2_opr1_prf, I2_opr2=>I2_opr2_prf, I1_opr1_v=>I1_opr1_v, I1_opr2_v=>I1_opr2_v, 
 							 I2_opr1_v=>I2_opr1_v, I2_opr2_v=>I2_opr2_v, lmsm=>lmsm, I_opcode=>I_opcode,
-							 I_addr=>(I_opr1_rr & I_opr2_rr & I_opr3_rr & I_opr4_rr & I_opr5_rr & I_opr6_rr & I_opr7_rr & I_opr8_rr)
+							 I_addr=>(I_opr1_rr & I_opr2_rr & I_opr3_rr & I_opr4_rr & I_opr5_rr & I_opr6_rr & I_opr7_rr & I_opr8_rr),
 							 v=>valid_lmsm, I_opr=>I_opr);
 	
 	I1_dest_rr<=I1_dest_rr_temp;
@@ -230,42 +230,42 @@ begin
 			end if;
 		else
 			if(I_opcode="1101") then
-				if(valid(0)='1') then
+				if(valid_lmsm(0)='1') then
 					I_opr1_out<=I_opr(15 downto 0);
 				else
 					I_opr1_out<=I_opr1_rr;
 				end if;
-				if(valid(1)='1') then
+				if(valid_lmsm(1)='1') then
 					I_opr2_out<=I_opr(31 downto 16);
 				else
 					I_opr2_out<=I_opr2_rr;
 				end if;
-				if(valid(2)='1') then
+				if(valid_lmsm(2)='1') then
 					I_opr3_out<=I_opr(47 downto 32);
 				else
 					I_opr3_out<=I_opr3_rr;
 				end if;
-				if(valid(3)='1') then
+				if(valid_lmsm(3)='1') then
 					I_opr4_out<=I_opr(63 downto 48);
 				else
 					I_opr4_out<=I_opr4_rr;
 				end if;
-				if(valid(4)='1') then
+				if(valid_lmsm(4)='1') then
 					I_opr5_out<=I_opr(79 downto 64);
 				else
 					I_opr5_out<=I_opr5_rr;
 				end if;
-				if(valid(5)='1') then
+				if(valid_lmsm(5)='1') then
 					I_opr6_out<=I_opr(95 downto 80);
 				else
 					I_opr6_out<=I_opr6_rr;
 				end if;
-				if(valid(6)='1') then
+				if(valid_lmsm(6)='1') then
 					I_opr7_out<=I_opr(111 downto 96);
 				else
 					I_opr7_out<=I_opr7_rr;
 				end if;
-				if(valid(7)='1') then
+				if(valid_lmsm(7)='1') then
 					I_opr8_out<=I_opr(127 downto 112);
 				else
 					I_opr8_out<=I_opr8_rr;
@@ -279,5 +279,8 @@ begin
 				I_opr6_out<=I_opr6_rr;
 				I_opr7_out<=I_opr7_rr;
 				I_opr8_out<=I_opr8_rr;
+			end if;
+		end if;
+end process;
 end renamer1;
 	
