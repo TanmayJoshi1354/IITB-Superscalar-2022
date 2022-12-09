@@ -235,37 +235,37 @@ begin
 				else
 					I_opr1_out<=I_opr1_rr;
 				end if;
-				if(valid(0)='1') then
+				if(valid(1)='1') then
 					I_opr2_out<=I_opr(31 downto 16);
 				else
 					I_opr2_out<=I_opr2_rr;
 				end if;
-				if(valid(0)='1') then
+				if(valid(2)='1') then
 					I_opr3_out<=I_opr(47 downto 32);
 				else
 					I_opr3_out<=I_opr3_rr;
 				end if;
-				if(valid(0)='1') then
+				if(valid(3)='1') then
 					I_opr4_out<=I_opr(63 downto 48);
 				else
 					I_opr4_out<=I_opr4_rr;
 				end if;
-				if(valid(0)='1') then
+				if(valid(4)='1') then
 					I_opr5_out<=I_opr(79 downto 64);
 				else
 					I_opr5_out<=I_opr5_rr;
 				end if;
-				if(valid(0)='1') then
+				if(valid(5)='1') then
 					I_opr6_out<=I_opr(95 downto 80);
 				else
 					I_opr6_out<=I_opr6_rr;
 				end if;
-				if(valid(0)='1') then
+				if(valid(6)='1') then
 					I_opr7_out<=I_opr(111 downto 96);
 				else
 					I_opr7_out<=I_opr7_rr;
 				end if;
-				if(valid(0)='1') then
+				if(valid(7)='1') then
 					I_opr8_out<=I_opr(127 downto 112);
 				else
 					I_opr8_out<=I_opr8_rr;

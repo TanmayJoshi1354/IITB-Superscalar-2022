@@ -27,6 +27,11 @@ entity backend is
 		I2_PC_in: in std_logic_vector(15 downto 0);
 		I2_inst_num_in: in std_logic_vector(6 downto 0);
 		
+		lmsm: in std_logic;
+		Iout1,Iout2,Iout3,Iout4,Iout5,Iout6,Iout7,Iout0: in std_logic_vector(43 downto 0);
+		N: in integer;
+		
+		DBWrite_en1, DBWrite_en2, DBWrite_en3, DBWrite_en4, en_write: in std_logic;
 		
 		
 	);
@@ -59,10 +64,9 @@ architecture b1 of backend is
 			I2_PC_in: in std_logic_vector(15 downto 0);
 			I2_inst_num_in: in std_logic_vector(6 downto 0);
 			
-			inst_cz: in std_logic_vector(6 downto 0);
-			cin: in std_logic;
-			zin: in std_logic;
-			cz_dep: in std_logic_vector(1 downto 0);
+			inst_cz: in std_logic_vector(6 downto 0); --alu pipeline
+			cin: in std_logic; --alu pipeline
+			zin: in std_logic; --alu pipeline
 			
 			--LMSM
 			lmsm: in std_logic;
@@ -70,18 +74,18 @@ architecture b1 of backend is
 			N: in integer;
 			
 			--Writeback
-			wb_din1: in std_logic_vector(15 downto 0);
-			wb_Addrin1: in std_logic_vector(5 downto 0);
-			wb_wr1: in std_logic;
-			wb_din2: in std_logic_vector(15 downto 0);
-			wb_Addrin2: in std_logic_vector(5 downto 0);
-			wb_wr2: in std_logic;
+			wb_din1: in std_logic_vector(15 downto 0); --ROB
+			wb_Addrin1: in std_logic_vector(5 downto 0); --ROB
+			wb_wr1: in std_logic; --ROB
+			wb_din2: in std_logic_vector(15 downto 0); --ROB
+			wb_Addrin2: in std_logic_vector(5 downto 0); --ROB
+			wb_wr2: in std_logic; --ROB
 			
-			I1_opr1_out:out std_logic_vector(15 downto 0);
-			I1_opr2_out:out std_logic_vector(15 downto 0);
-			I1_dest_reg_out: out std_logic_vector(2 downto 0);
-			I1_opcode_out: out std_logic_vector(3 downto 0);
-			I1_dec_out: out std_logic_vector(2 downto 0);
+			I1_opr1_out:out std_logic_vector(15 downto 0); --ALUp
+			I1_opr2_out:out std_logic_vector(15 downto 0); --ALUp
+			I1_dest_reg_out: out std_logic_vector(2 downto 0); --ALUp
+			I1_opcode_out: out std_logic_vector(3 downto 0); --ALUp
+			I1_dec_out: out std_logic_vector(2 downto 0); --ALUp
 			I1_c: out std_logic;
 			I1_z: out std_logic;
 			
@@ -116,7 +120,7 @@ architecture b1 of backend is
 	
 	component RoB is
 		port(
-			rst, clk, DBWrite_en1, DBWrite_en2, DBWrite_en3, en_write: in std_logic;--remove write enable if not needed
+			rst, clk, DBWrite_en1, DBWrite_en2, DBWrite_en3, DBWrite_en4, en_write: in std_logic;--remove write enable if not needed
 			d_in1, d_in2: in std_logic_vector(53 downto 0);
 			d_DB1, d_DB2, d_DB3, d_DB4: in std_logic_vector(15 downto 0);--for the result coming in from the three pipelines
 			mem_addr3, mem_addr4: in std_logic_vector(15 downto 0);
@@ -204,5 +208,67 @@ architecture b1 of backend is
 				Read_Data_Out2 : out std_logic_vector(15 downto 0));
 	end component;
 	
+	signal inst_cz: std_logic_vector(6 downto 0);
+	signal cin,zin: in std_logic;
+	
 begin
-	reservation_stn: rs port map ()
+	reservation_stn: rs port map (clk=>clk,rst=>rst,wr1=>wr1,wr2=>wr2,I1_opr1_in=>I1_opr1_in,I1_opr2_in=>I1_opr2_in,
+											I1_v1_in=>I1_v1_in,I1_v2_in=>I1_v2_in,I1_dest_reg_in=>I1_dest_reg_in,
+											I1_opcode_in=>I1_opcode_in,I1_dec_in=>I1_dec_in,I1_PC_in=>I1_PC_in,
+											I1_inst_num_in=>I1_inst_num_in,I2_opr1_in=>I2_opr1_in,I2_opr2_in=>I2_opr2_in,
+											I2_v1_in=>I2_v1_in,I2_v2_in=>I2_v2_in,I2_dest_reg_in=>I2_dest_reg_in,
+											I2_opcode_in=>I2_opcode_in,I2_dec_in=>I2_dec_in,I2_PC_in=>I2_PC_in,
+											I2_inst_num_in=>I2_inst_num_in,inst_cz=>inst_cz,cin=>cin,zin=>zin,lmsm=>lmsm,
+											
+			
+			inst_cz: in std_logic_vector(6 downto 0); --alu pipeline
+			cin: in std_logic; --alu pipeline
+			zin: in std_logic; --alu pipeline
+			
+			--LMSM
+			lmsm: in std_logic;
+			Iout1,Iout2,Iout3,Iout4,Iout5,Iout6,Iout7,Iout0: in std_logic_vector(43 downto 0);
+			N: in integer;
+			
+			--Writeback
+			wb_din1: in std_logic_vector(15 downto 0); --ROB
+			wb_Addrin1: in std_logic_vector(5 downto 0); --ROB
+			wb_wr1: in std_logic; --ROB
+			wb_din2: in std_logic_vector(15 downto 0); --ROB
+			wb_Addrin2: in std_logic_vector(5 downto 0); --ROB
+			wb_wr2: in std_logic; --ROB
+			
+			I1_opr1_out:out std_logic_vector(15 downto 0); --ALUp
+			I1_opr2_out:out std_logic_vector(15 downto 0); --ALUp
+			I1_dest_reg_out: out std_logic_vector(2 downto 0); --ALUp
+			I1_opcode_out: out std_logic_vector(3 downto 0); --ALUp
+			I1_dec_out: out std_logic_vector(2 downto 0); --ALUp
+			I1_c: out std_logic;
+			I1_z: out std_logic;
+			
+			I2_opr1_out:out std_logic_vector(15 downto 0);
+			I2_opr2_out:out std_logic_vector(15 downto 0);
+			I2_dest_reg_out: out std_logic_vector(2 downto 0);
+			I2_opcode_out: out std_logic_vector(3 downto 0);
+			I2_dec_out: out std_logic_vector(2 downto 0);
+			I2_c: out std_logic;
+			I2_z: out std_logic;
+			
+			I3_opr1_out:out std_logic_vector(15 downto 0);
+			I3_opr2_out:out std_logic_vector(15 downto 0);
+			I3_dest_reg_out: out std_logic_vector(2 downto 0);
+			I3_opcode_out: out std_logic_vector(3 downto 0);
+			I3_dec_out: out std_logic_vector(2 downto 0);
+			I3_dest: out std_logic_vector(5 downto 0);
+			
+			I4_opr1_out:out std_logic_vector(15 downto 0);
+			I4_opr2_out:out std_logic_vector(15 downto 0);
+			I4_dest_reg_out: out std_logic_vector(2 downto 0);
+			I4_opcode_out: out std_logic_vector(3 downto 0);
+			I4_dec_out: out std_logic_vector(2 downto 0);
+			I4_dest: out std_logic_vector(5 downto 0);
+			
+			inst_num1: out std_logic_vector(6 downto 0);
+			inst_num2: out std_logic_vector(6 downto 0);
+			inst_num3: out std_logic_vector(6 downto 0);
+			inst_num4: out std_logic_vector(6 downto 0))

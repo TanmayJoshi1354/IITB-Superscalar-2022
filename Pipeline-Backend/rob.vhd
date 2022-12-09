@@ -4,7 +4,7 @@ use ieee.numeric_std.all;
 
 entity RoB is
     port(
-		 rst, clk, DBWrite_en1, DBWrite_en2, DBWrite_en3, en_write: in std_logic;--remove write enable if not needed
+		 rst, clk, DBWrite_en1, DBWrite_en2, DBWrite_en3, DBWrite_en4, en_write: in std_logic;--remove write enable if not needed
 		 d_in1, d_in2: in std_logic_vector(53 downto 0);
 		 d_DB1, d_DB2, d_DB3, d_DB4: in std_logic_vector(15 downto 0);--for the result coming in from the three pipelines
 		 mem_addr3, mem_addr4: in std_logic_vector(15 downto 0);
