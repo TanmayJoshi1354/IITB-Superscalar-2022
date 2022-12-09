@@ -165,7 +165,8 @@ architecture renamer1 of renamer is
 	end component;
 	
 	signal I1_dest_rr_temp, I2_dest_rr_temp, I_opr1_rr, I_opr2_rr, I_opr3_rr, I_opr4_rr, I_opr5_rr, I_opr6_rr, I_opr7_rr, I_opr8_rr: std_logic_vector(5 downto 0);
-	signal I1_opr1_rat, I1_opr2_rat, I2_opr1_rat, I2_opr2_rat, I1_opr1_prf, I1_opr2_prf, I2_opr1_prf, I2_opr2_prf: std_logic_vector(15 downto 0);
+	signal I1_opr1_rat, I1_opr2_rat, I2_opr1_rat, I2_opr2_rat: std_logic_vector(5 downto 0);
+	signal I1_opr1_prf, I1_opr2_prf, I2_opr1_prf, I2_opr2_prf: std_logic_vector(15 downto 0);
 	signal I1_opr1_v, I1_opr2_v, I2_opr1_v, I2_opr2_v: std_logic;
 	signal valid_lmsm: std_logic_vector(7 downto 0);
 	signal I_opr: std_logic_vector(127 downto 0);

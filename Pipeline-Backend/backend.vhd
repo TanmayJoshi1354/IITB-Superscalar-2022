@@ -8,6 +8,7 @@ entity backend is
 		rst: in std_logic;
 		wr1: in std_logic;
 		wr2: in std_logic;
+		clr_ls: in std_logic;
 		I1_opr1_in:in std_logic_vector(15 downto 0);
 		I1_opr2_in:in std_logic_vector(15 downto 0);
 		I1_v1_in: in std_logic_vector(0 downto 0);
@@ -32,6 +33,9 @@ entity backend is
 		N: in integer;
 		
 		DBWrite_en1, DBWrite_en2, DBWrite_en3, DBWrite_en4, en_write: in std_logic;
+		
+		forjlr_alu1: out std_logic_vector(15 downto 0);
+		forjlr_alu2: out std_logic_vector(15 downto 0);
 		
 		
 	);
@@ -208,8 +212,21 @@ architecture b1 of backend is
 				Read_Data_Out2 : out std_logic_vector(15 downto 0));
 	end component;
 	
-	signal inst_cz: std_logic_vector(6 downto 0);
-	signal cin,zin: in std_logic;
+	signal inst_cz,I1_num, I2_num, I3_num, I4_num,I1_numrob, I2_numrob, I3_numrob, I4_numrob: std_logic_vector(6 downto 0);
+	signal cin,zin: std_logic;
+	signal wb_d1, wb_d2, I1_opr1_alu, I1_opr2_alu, I2_opr1_alu, I2_opr2_alu, I3_opr1_ls, I3_opr2_ls, I4_opr1_ls, I4_opr2_ls: std_logic_vector(15 downto 0);
+	signal wb_addr1, wb_addr2, I3_dest, I4_dest: std_logic_vector(5 downto 0);
+	signal wb_wr1, wb_wr2, wr_ls_reg: std_logic;
+	signal I1_opcode,I2_opcode,I3_opcode,I4_opcode, I3_opcode_out, I4_opcode_out: std_logic_vector(3 downto 0);
+	signal I1_dr,I2_dr,I3_dr,I4_dr: std_logic_vector(2 downto 0);
+	signal I1_dec, I2_dec, I3_dec, I4_dec: std_logic_vector(2 downto 0);
+	signal I1_c,I1_z,I2_c,I2_z: std_logic;
+	signal res_alu1, res_alu2: std_logic_vector(15 downto 0);
+	signal c_alu1, c_alu2, z_alu1, z_alu2: std_logic;
+	signal clr_lsp: std_logic;
+	signal sel_ls1,sel_ls2: std_logic_vector(1 downto 0);
+	signal mem_data_ls1, mem_data_ls2, sq_data_ls1, sq_data_ls2: std_logic_vector(15 downto 0);
+	signal memrob_ls1, datarob_ls1,memrob_ls2, datarob_ls2: std_logic_vector(15 downto 0);
 	
 begin
 	reservation_stn: rs port map (clk=>clk,rst=>rst,wr1=>wr1,wr2=>wr2,I1_opr1_in=>I1_opr1_in,I1_opr2_in=>I1_opr2_in,
@@ -219,56 +236,59 @@ begin
 											I2_v1_in=>I2_v1_in,I2_v2_in=>I2_v2_in,I2_dest_reg_in=>I2_dest_reg_in,
 											I2_opcode_in=>I2_opcode_in,I2_dec_in=>I2_dec_in,I2_PC_in=>I2_PC_in,
 											I2_inst_num_in=>I2_inst_num_in,inst_cz=>inst_cz,cin=>cin,zin=>zin,lmsm=>lmsm,
+											Iout1=>Iout1,Iout2=>Iout2,Iout3=>Iout3,Iout4=>Iout4,Iout5=>Iout5,Iout6=>Iout6,
+											Iout7=>Iout7,Iout0=>Iout0,N=>N,wb_din1=>wb_d1,wb_Addrin1=>wb_addr1,wb_wr1=>wb_wr1,
+											wb_din2=>wb_d2,wb_Addrin2=>wb_addr2,wb_wr2=>wb_wr2,I1_opr1_out=>I1_opr1_alu,
+											I1_opr2_out=>I1_opr2_alu,I2_opr1_out=>I2_opr1_alu,I2_opr2_out=>I2_opr2_alu,
+											I1_dest_reg_out=>I1_dr,I1_opcode_out=>I1_opcode,I1_dec_out=>I1_dec,I1_c=>I1_c,
+											I1_z=>I1_z,I2_dest_reg_out=>I2_dr,I2_opcode_out=>I2_opcode,I2_dec_out=>I2_dec,
+											I2_c=>I2_c,I2_z=>I2_z,I3_opr1_out=>I3_opr1_ls,I3_opr2_out=>I3_opr2_ls,
+											I3_dest_reg_out=>I3_dr,I3_opcode_out=>I3_opcode,I3_dec_out=>I3_dec,
+											I3_dest=>I3_dest,I4_opr1_out=>I4_opr1_ls,I4_opr2_out=>I4_opr2_ls,
+											I4_dest_reg_out=>I4_dr,I4_opcode_out=>I4_opcode,I4_dec_out=>I4_dec,
+											I4_dest=>I4_dest,inst_num1=>I1_num,inst_num2=>I2_num,inst_num2=>I2_num,
+											inst_num2=>I2_num);
 											
-			
-			inst_cz: in std_logic_vector(6 downto 0); --alu pipeline
-			cin: in std_logic; --alu pipeline
-			zin: in std_logic; --alu pipeline
-			
-			--LMSM
-			lmsm: in std_logic;
-			Iout1,Iout2,Iout3,Iout4,Iout5,Iout6,Iout7,Iout0: in std_logic_vector(43 downto 0);
-			N: in integer;
-			
-			--Writeback
-			wb_din1: in std_logic_vector(15 downto 0); --ROB
-			wb_Addrin1: in std_logic_vector(5 downto 0); --ROB
-			wb_wr1: in std_logic; --ROB
-			wb_din2: in std_logic_vector(15 downto 0); --ROB
-			wb_Addrin2: in std_logic_vector(5 downto 0); --ROB
-			wb_wr2: in std_logic; --ROB
-			
-			I1_opr1_out:out std_logic_vector(15 downto 0); --ALUp
-			I1_opr2_out:out std_logic_vector(15 downto 0); --ALUp
-			I1_dest_reg_out: out std_logic_vector(2 downto 0); --ALUp
-			I1_opcode_out: out std_logic_vector(3 downto 0); --ALUp
-			I1_dec_out: out std_logic_vector(2 downto 0); --ALUp
-			I1_c: out std_logic;
-			I1_z: out std_logic;
-			
-			I2_opr1_out:out std_logic_vector(15 downto 0);
-			I2_opr2_out:out std_logic_vector(15 downto 0);
-			I2_dest_reg_out: out std_logic_vector(2 downto 0);
-			I2_opcode_out: out std_logic_vector(3 downto 0);
-			I2_dec_out: out std_logic_vector(2 downto 0);
-			I2_c: out std_logic;
-			I2_z: out std_logic;
-			
-			I3_opr1_out:out std_logic_vector(15 downto 0);
-			I3_opr2_out:out std_logic_vector(15 downto 0);
-			I3_dest_reg_out: out std_logic_vector(2 downto 0);
-			I3_opcode_out: out std_logic_vector(3 downto 0);
-			I3_dec_out: out std_logic_vector(2 downto 0);
-			I3_dest: out std_logic_vector(5 downto 0);
-			
-			I4_opr1_out:out std_logic_vector(15 downto 0);
-			I4_opr2_out:out std_logic_vector(15 downto 0);
-			I4_dest_reg_out: out std_logic_vector(2 downto 0);
-			I4_opcode_out: out std_logic_vector(3 downto 0);
-			I4_dec_out: out std_logic_vector(2 downto 0);
-			I4_dest: out std_logic_vector(5 downto 0);
-			
-			inst_num1: out std_logic_vector(6 downto 0);
-			inst_num2: out std_logic_vector(6 downto 0);
-			inst_num3: out std_logic_vector(6 downto 0);
-			inst_num4: out std_logic_vector(6 downto 0))
+	ALB_Pipeline1: AL port map(instruction=>(I1_opcode & I1_opr1_alu & I1_opr2_alu & I1_c & I1_z & I1_dec),
+										Inum=>I1_num,Inumrob=>I1_numrob,clock=>clk,result=>res_alu1,Carry=>c_alu1,
+										Zero=>z_alu1,forjlr=>forjlr1);
+										
+	ALB_Pipeline2: AL port map(instruction=>(I2_opcode & I2_opr1_alu & I2_opr2_alu & I2_c & I2_z & I2_dec),
+										Inum=>I2_num,Inumrob=>I2_numrob,clock=>clk,result=>res_alu2,Carry=>c_alu2,
+										Zero=>z_alu2,forjlr=>forjlr2);
+										
+	LS_Pipeline1: ls_pipeline port map(clk=>clk,clr=>clr_lsp,wr_reg=>wr_ls_reg1,inst_num_in=>I3_num,
+												  inst_opcode_in=>I3_opcode,opr1=>I3_opr1_ls,opr2=>I3_opr2_ls,
+												  mem_data_in=>mem_data_ls1,sq_data_in=>sq_data_ls1,s_m2=>sel_ls1,
+												  inst_num_out=>I3_numrob,inst_opcode_out=>I3_opcode_out,
+												  mem_addr_out=>memrob_ls1,data_out=>datarob_ls1);
+	
+	LS_Pipeline2: ls_pipeline port map(clk=>clk,clr=>clr_lsp,wr_reg=>wr_ls_reg2,inst_num_in=>I4_num,
+												  inst_opcode_in=>I4_opcode,opr1=>I4_opr1_ls,opr2=>I4_opr2_ls,
+												  mem_data_in=>mem_data_ls2,sq_data_in=>sq_data_ls2,s_m2=>sel_ls2,
+												  inst_num_out=>I4_numrob,inst_opcode_out=>I4_opcode_out,
+												  mem_addr_out=>memrob_ls2,data_out=>datarob_ls2);
+	
+	LSQ: LS_Queue port map();
+	
+	ROB: RoB port map();
+	
+	Data_Mem: DMem port map();
+
+	
+	process(rst, clr_ls)
+	begin
+		if(rst='1' or clr_ls='1') then
+			clr_lsp<='1';
+		else
+			clr_lsp<='0';
+		end if;
+		if(sel_ls1="00") then
+			wr_ls_reg1<='0';
+		end if;
+		if(sel_ls2="00") then
+			wr_ls_reg2<='0';
+		end if;
+	end process;
+											
+end b1;

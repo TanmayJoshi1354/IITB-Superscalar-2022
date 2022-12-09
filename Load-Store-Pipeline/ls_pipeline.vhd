@@ -72,6 +72,6 @@ begin
 													mem_addr_in=>add_out, inst_opcode_in=>inst_opcode_in, data_in=>opr1,
 													inst_num_out=>inst_num_out, mem_addr_out=>mem_addr_out,
 													inst_opcode_out=>inst_opcode_out, data_out=>data);
-	m2: mux41 port map (A0=>mem_data_in, A1=>sq_data_in, A2=>data, A3=>(others=>'0'), S=>s_m2, Op=>data_out);
+	m2: mux41 port map (A0=>data, A1=>sq_data_in, A2=>mem_data_in, A3=>(others=>'0'), S=>s_m2, Op=>data_out);
 		
 end ls1;
